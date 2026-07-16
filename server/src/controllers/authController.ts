@@ -5,9 +5,7 @@ import { generateToken } from "../utils/jwt";
 import { AuthRequest } from "../middleware/auth";
 
 export async function register(req: Request, res: Response) {
-
     try {
-
         const { name, email, password } = req.body;
 
         if (!name || !email || !password) {
@@ -18,12 +16,12 @@ export async function register(req: Request, res: Response) {
 
         const db = await dbPromise;
 
-        const existing = await db.get(
+        const existingUser = await db.get(
             "SELECT * FROM users WHERE email = ?",
             [email]
         );
 
-        if (existing) {
+        if (existingUser) {
             return res.status(409).json({
                 message: "Email already exists."
             });
@@ -48,7 +46,7 @@ export async function register(req: Request, res: Response) {
         const token = generateToken(user);
 
         return res.status(201).json({
-            message: "User registered successfully.",
+            message: "Registration successful.",
             token,
             user
         });
@@ -58,11 +56,13 @@ export async function register(req: Request, res: Response) {
         console.error(error);
 
         return res.status(500).json({
-            message: "Internal Server Error"
+            message:
+                error instanceof Error
+                    ? error.message
+                    : "Internal Server Error"
         });
 
     }
-
 }
 
 export async function login(req: Request, res: Response) {
@@ -71,10 +71,20 @@ export async function login(req: Request, res: Response) {
 
         const { email, password } = req.body;
 
+        if (!email || !password) {
+            return res.status(400).json({
+                message: "Email and password are required."
+            });
+        }
+
         const db = await dbPromise;
 
         const user = await db.get(
-            "SELECT * FROM users WHERE email = ?",
+            `
+            SELECT *
+            FROM users
+            WHERE email = ?
+            `,
             [email]
         );
 
@@ -84,12 +94,12 @@ export async function login(req: Request, res: Response) {
             });
         }
 
-        const isMatch = await bcrypt.compare(
+        const isPasswordCorrect = await bcrypt.compare(
             password,
             user.password
         );
 
-        if (!isMatch) {
+        if (!isPasswordCorrect) {
             return res.status(401).json({
                 message: "Invalid password."
             });
@@ -98,6 +108,7 @@ export async function login(req: Request, res: Response) {
         const token = generateToken(user);
 
         return res.json({
+            message: "Login successful.",
             token,
             user: {
                 id: user.id,
@@ -111,14 +122,19 @@ export async function login(req: Request, res: Response) {
         console.error(error);
 
         return res.status(500).json({
-            message: "Internal Server Error"
+            message:
+                error instanceof Error
+                    ? error.message
+                    : "Internal Server Error"
         });
 
     }
-
 }
 
-export async function profile(req: AuthRequest, res: Response) {
+export async function profile(
+    req: AuthRequest,
+    res: Response
+) {
 
     try {
 
@@ -126,12 +142,22 @@ export async function profile(req: AuthRequest, res: Response) {
 
         const user = await db.get(
             `
-            SELECT id,name,email,created_at
+            SELECT
+                id,
+                name,
+                email,
+                created_at
             FROM users
             WHERE id = ?
             `,
             [req.user.id]
         );
+
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found."
+            });
+        }
 
         return res.json(user);
 
@@ -140,9 +166,11 @@ export async function profile(req: AuthRequest, res: Response) {
         console.error(error);
 
         return res.status(500).json({
-            message: "Internal Server Error"
+            message:
+                error instanceof Error
+                    ? error.message
+                    : "Internal Server Error"
         });
 
     }
-
 }
