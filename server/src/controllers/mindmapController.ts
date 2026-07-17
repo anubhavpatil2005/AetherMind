@@ -247,3 +247,68 @@ export async function deleteMindMap(
     }
 
 }
+
+export async function getGraph(
+    req: AuthRequest,
+    res: Response
+) {
+    try {
+
+        const db = await dbPromise;
+
+        const mindmap = await db.get(
+            `
+            SELECT *
+            FROM mindmaps
+            WHERE id = ?
+            AND user_id = ?
+            `,
+            [
+                req.params.id,
+                req.user.id
+            ]
+        );
+
+        if (!mindmap) {
+            return res.status(404).json({
+                message: "MindMap not found."
+            });
+        }
+
+        const nodes = await db.all(
+            `
+            SELECT *
+            FROM nodes
+            WHERE mindmap_id = ?
+            `,
+            [req.params.id]
+        );
+
+        const edges = await db.all(
+            `
+            SELECT *
+            FROM edges
+            WHERE mindmap_id = ?
+            `,
+            [req.params.id]
+        );
+
+        return res.json({
+            mindmap,
+            nodes,
+            edges
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        return res.status(500).json({
+            message:
+                error instanceof Error
+                    ? error.message
+                    : "Internal Server Error"
+        });
+
+    }
+}

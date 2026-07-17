@@ -7,26 +7,17 @@ import {
     getMindMaps,
     getMindMap,
     updateMindMap,
-    deleteMindMap
+    deleteMindMap,
+    getGraph
 } from "../controllers/mindmapController";
 
 const router = Router();
 
-/*
-|--------------------------------------------------------------------------
-| Protected Routes
-|--------------------------------------------------------------------------
-*/
-
 router.use(authenticate);
 
-/*
-|--------------------------------------------------------------------------
-| CRUD
-|--------------------------------------------------------------------------
-*/
-
 router.get("/", getMindMaps);
+
+router.get("/:id/graph", getGraph);
 
 router.get("/:id", getMindMap);
 

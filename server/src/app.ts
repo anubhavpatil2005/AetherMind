@@ -5,18 +5,16 @@ import dotenv from "dotenv";
 import authRoutes from "./routes/authRoutes";
 import mindmapRoutes from "./routes/mindmapRoutes";
 import nodeRoutes from "./routes/nodeRoutes";
-
+import edgeRoutes from "./routes/edgeRoutes";
 
 dotenv.config();
 
 const app = express();
 
 app.use(cors());
-
 app.use(express.json());
-
 app.use(express.urlencoded({ extended: true }));
-app.use("/api/nodes", nodeRoutes);
+
 app.get("/", (req, res) => {
     res.json({
         success: true,
@@ -24,14 +22,9 @@ app.get("/", (req, res) => {
     });
 });
 
-/*
-|--------------------------------------------------------------------------
-| Routes
-|--------------------------------------------------------------------------
-*/
-
 app.use("/api/auth", authRoutes);
-
 app.use("/api/mindmaps", mindmapRoutes);
+app.use("/api/nodes", nodeRoutes);
+app.use("/api/edges", edgeRoutes);
 
 export default app;
