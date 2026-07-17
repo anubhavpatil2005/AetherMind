@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 
 import authRoutes from "./routes/authRoutes";
 import mindmapRoutes from "./routes/mindmapRoutes";
+import nodeRoutes from "./routes/nodeRoutes";
+
 
 dotenv.config();
 
@@ -14,7 +16,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use(express.urlencoded({ extended: true }));
-
+app.use("/api/nodes", nodeRoutes);
 app.get("/", (req, res) => {
     res.json({
         success: true,
