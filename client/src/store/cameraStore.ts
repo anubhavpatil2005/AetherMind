@@ -1,15 +1,17 @@
 import { create } from "zustand";
 
 interface CameraState {
+
     x: number;
+
     y: number;
+
     zoom: number;
 
-    setCamera: (x: number, y: number, zoom: number) => void;
-
-    moveCamera: (dx: number, dy: number) => void;
+    setPosition: (x: number, y: number) => void;
 
     setZoom: (zoom: number) => void;
+
 }
 
 export const useCameraStore = create<CameraState>((set) => ({
@@ -20,22 +22,8 @@ export const useCameraStore = create<CameraState>((set) => ({
 
     zoom: 1,
 
-    setCamera: (x, y, zoom) =>
-        set({
-            x,
-            y,
-            zoom
-        }),
+    setPosition: (x, y) => set({ x, y }),
 
-    moveCamera: (dx, dy) =>
-        set((state) => ({
-            x: state.x + dx,
-            y: state.y + dy
-        })),
-
-    setZoom: (zoom) =>
-        set({
-            zoom
-        })
+    setZoom: (zoom) => set({ zoom })
 
 }));
