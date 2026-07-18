@@ -1,146 +1,67 @@
-import { useRef } from "react";
+import { useEffect } from "react";
 
 import Grid from "./Grid";
-import Viewport from "./Viewport";
-import Node from "./Node";
-import Edges from "./Edges";
+
+import CameraController from "./controllers/CameraController";
+import InteractionController from "./controllers/InteractionController";
+import GraphRenderer from "./renderers/GraphRenderer";
+
 import { useCameraStore } from "../store/cameraStore";
+import { useGraphStore } from "../store/graphStore";
 
-export default function Canvas() {
+interface CanvasProps {
+    mindmapId: number;
+}
 
-    const x = useCameraStore((state) => state.x);
-    const y = useCameraStore((state) => state.y);
-    const zoom = useCameraStore((state) => state.zoom);
-    const move = useCameraStore((state) => state.move);
-    const zoomIn = useCameraStore((state) => state.zoomIn);
+export default function Canvas({
+    mindmapId
+}: CanvasProps) {
 
-    const dragging = useRef(false);
+    const {
+        x,
+        y,
+        zoom
+    } = useCameraStore();
 
-    const previous = useRef({
-        x: 0,
-        y: 0
-    });
+    const {
+        loading,
+        loadGraph
+    } = useGraphStore();
 
-    const nodes = [
+    useEffect(() => {
 
-        {
-            id: 1,
-            title: "Artificial Intelligence",
-            x: 200,
-            y: 120
-        },
+        if (!mindmapId) return;
 
-        {
-            id: 2,
-            title: "Machine Learning",
-            x: 520,
-            y: 260
-        },
+        loadGraph(mindmapId);
 
-        {
-            id: 3,
-            title: "Deep Learning",
-            x: 840,
-            y: 180
-        }
+    }, [mindmapId, loadGraph]);
 
-    ];
+    if (loading) {
 
-    const edges = [
+        return (
 
-        {
-            id: 1,
-            source_node_id: 1,
-            target_node_id: 2
-        },
+            <div
+                style={{
+                    width: "100vw",
+                    height: "100vh",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    background: "#0F172A",
+                    color: "white",
+                    fontSize: 22
+                }}
+            >
+                Loading Graph...
+            </div>
 
-        {
-            id: 2,
-            source_node_id: 2,
-            target_node_id: 3
-        }
-
-    ];
-
-    function onMouseDown(
-        e: React.MouseEvent
-    ) {
-
-        dragging.current = true;
-
-        previous.current = {
-
-            x: e.clientX,
-
-            y: e.clientY
-
-        };
-
-    }
-
-    function onMouseMove(
-        e: React.MouseEvent
-    ) {
-
-        if (!dragging.current) return;
-
-        const dx =
-            e.clientX -
-            previous.current.x;
-
-        const dy =
-            e.clientY -
-            previous.current.y;
-
-        move(dx, dy);
-
-        previous.current = {
-
-            x: e.clientX,
-
-            y: e.clientY
-
-        };
-
-    }
-
-    function onMouseUp() {
-
-        dragging.current = false;
-
-    }
-
-    function onWheel(
-        e: React.WheelEvent
-    ) {
-
-        e.preventDefault();
-
-        zoomIn(
-            e.deltaY > 0
-                ? -0.1
-                : 0.1
         );
 
     }
 
     return (
 
-        <div
-            onMouseDown={onMouseDown}
-            onMouseMove={onMouseMove}
-            onMouseUp={onMouseUp}
-            onMouseLeave={onMouseUp}
-            onWheel={onWheel}
-            style={{
-                width: "100vw",
-                height: "100vh",
-                overflow: "hidden",
-                position: "relative",
-                background: "#0f172a",
-                cursor: dragging.current ? "grabbing" : "grab"
-            }}
-        >
+        <InteractionController>
 
             <Grid
                 x={x}
@@ -148,37 +69,13 @@ export default function Canvas() {
                 zoom={zoom}
             />
 
-            <Viewport
-                x={x}
-                y={y}
-                zoom={zoom}
-            >
+            <CameraController>
 
-                {/* SVG Connections */}
+                <GraphRenderer />
 
-                <Edges
-                    nodes={nodes}
-                    edges={edges}
-                />
+            </CameraController>
 
-                {/* Render Nodes */}
-
-                {
-                    nodes.map(node => (
-
-                        <Node
-                            key={node.id}
-                            title={node.title}
-                            x={node.x}
-                            y={node.y}
-                        />
-
-                    ))
-                }
-
-            </Viewport>
-
-        </div>
+        </InteractionController>
 
     );
 

@@ -1,4 +1,8 @@
+import { useRef } from "react";
+
 interface Props {
+
+    id: number;
 
     title: string;
 
@@ -6,54 +10,141 @@ interface Props {
 
     y: number;
 
+    onMove: (
+        id: number,
+        x: number,
+        y: number
+    ) => void;
+
+    onSave: (
+        id: number
+    ) => void;
+
 }
 
 export default function Node({
+
+    id,
 
     title,
 
     x,
 
-    y
+    y,
 
-}: Props) {
+    onMove,
 
-    return (
+    onSave
+
+}: Props){
+
+    const drag = useRef(false);
+
+    const offset = useRef({
+
+        x:0,
+
+        y:0
+
+    });
+
+    function pointerDown(
+        e:React.PointerEvent<HTMLDivElement>
+    ){
+
+        e.stopPropagation();
+
+        drag.current=true;
+
+        offset.current={
+
+            x:e.clientX-x,
+
+            y:e.clientY-y
+
+        };
+
+        e.currentTarget.setPointerCapture(
+
+            e.pointerId
+
+        );
+
+    }
+
+    function pointerMove(
+
+        e:React.PointerEvent<HTMLDivElement>
+
+    ){
+
+        if(!drag.current)return;
+
+        onMove(
+
+            id,
+
+            e.clientX-offset.current.x,
+
+            e.clientY-offset.current.y
+
+        );
+
+    }
+
+    function pointerUp(
+        e: React.PointerEvent<HTMLDivElement>
+    ) {
+
+        drag.current = false;
+
+        onSave(id);
+
+        e.currentTarget.releasePointerCapture(
+            e.pointerId
+        );
+
+    }
+
+    return(
 
         <div
 
+            onPointerDown={pointerDown}
+
+            onPointerMove={pointerMove}
+
+            onPointerUp={pointerUp}
+
             style={{
 
-                position: "absolute",
+                position:"absolute",
 
-                left: x,
+                left:x,
 
-                top: y,
+                top:y,
 
-                width: 180,
+                width:190,
 
-                minHeight: 70,
+                minHeight:80,
 
-                padding: 18,
+                padding:18,
 
-                borderRadius: 18,
+                borderRadius:18,
 
-                background: "#1E293B",
+                background:"#1E293B",
 
-                color: "#fff",
+                color:"white",
 
-                border: "1px solid #3B82F6",
+                border:"1px solid #3B82F6",
 
-                boxShadow:
-                    "0 10px 25px rgba(59,130,246,.25)",
+                boxShadow:"0 12px 30px rgba(0,0,0,.35)",
 
-                fontWeight: 600,
+                cursor:"grab",
 
-                userSelect: "none",
+                userSelect:"none",
 
-                transition: ".2s",
-
-                cursor: "grab"
+                transition:"box-shadow .2s"
 
             }}
 

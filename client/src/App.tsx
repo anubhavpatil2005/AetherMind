@@ -8,7 +8,7 @@ import {
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
-
+import MindMapPage from "./pages/MindMapPage";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import MainLayout from "./layouts/MainLayout";
 
@@ -19,6 +19,12 @@ export default function App() {
         <BrowserRouter>
 
             <Routes>
+
+                <Route
+                    path="/mindmap/:id"
+                    element={<MindMapPage />}
+                />
+
 
                 <Route
                     path="/"

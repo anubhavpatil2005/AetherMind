@@ -1,27 +1,37 @@
 import api from "./axios";
 
-export interface RegisterData {
-    name: string;
-    email: string;
-    password: string;
-}
-
-export interface LoginData {
-    email: string;
-    password: string;
-}
-
-export const register = async (data: RegisterData) => {
-    const response = await api.post("/auth/register", data);
-    return response.data;
+export const getMindMaps = async () => {
+    const res = await api.get("/mindmaps");
+    return res.data;
 };
 
-export const login = async (data: LoginData) => {
-    const response = await api.post("/auth/login", data);
-    return response.data;
+export const getMindMap = async (id: number) => {
+    const res = await api.get(`/mindmaps/${id}`);
+    return res.data;
 };
 
-export const profile = async () => {
-    const response = await api.get("/auth/profile");
-    return response.data;
+export const getGraph = async (id: number) => {
+    const res = await api.get(`/mindmaps/${id}/graph`);
+    return res.data;
+};
+
+export const createMindMap = async (data: {
+    title: string;
+    description: string;
+}) => {
+    const res = await api.post("/mindmaps", data);
+    return res.data;
+};
+
+export const updateMindMap = async (
+    id: number,
+    data: any
+) => {
+    const res = await api.put(`/mindmaps/${id}`, data);
+    return res.data;
+};
+
+export const deleteMindMap = async (id: number) => {
+    const res = await api.delete(`/mindmaps/${id}`);
+    return res.data;
 };
