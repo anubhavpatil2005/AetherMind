@@ -1,43 +1,52 @@
-type Props={
+interface Props {
 
-    x:number;
+    x: number;
 
-    y:number;
+    y: number;
 
-    zoom:number;
+    zoom: number;
 
 }
 
-export default function Grid({x,y,zoom}:Props){
+export default function Grid({
 
-    const size=40*zoom;
+    x,
 
-    return(
+    y,
+
+    zoom
+
+}: Props) {
+
+    const size = 50 * zoom;
+
+    return (
 
         <div
 
             style={{
 
-                position:"absolute",
+                position: "absolute",
 
-                inset:0,
+                inset: 0,
 
-                backgroundSize:`${size}px ${size}px`,
+                backgroundImage: `
+                linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px)
+                `,
 
-                backgroundPosition:`${-x*zoom}px ${-y*zoom}px`,
+                backgroundSize:
 
-                backgroundImage:`
+                    `${size}px ${size}px`,
 
-                linear-gradient(to right,#2f2f2f 1px,transparent 1px),
+                backgroundPosition:
 
-                linear-gradient(to bottom,#2f2f2f 1px,transparent 1px)
-
-                `
+                    `${x}px ${y}px`
 
             }}
 
         />
 
-    )
+    );
 
 }
