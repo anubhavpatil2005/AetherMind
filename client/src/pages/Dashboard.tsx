@@ -243,197 +243,50 @@ export default function Dashboard() {
 
             {/* Cards */}
 
-            <div
+            {/* Cards */}
 
-                style={{
+            {
 
-                    display: "grid",
+                !loading && maps.length > 0 && (
 
-                    gridTemplateColumns:
+                    <div
 
-                        "repeat(auto-fill,minmax(320px,1fr))",
+                        style={{
 
-                    gap: 25
+                            display: "grid",
 
-                }}
+                            gridTemplateColumns:
+                                "repeat(auto-fill, minmax(320px, 1fr))",
 
-            >
+                            gap: 25
 
-                {
+                        }}
 
-                    maps.map((map) => (
+                    >
 
-                        <div
+                        {
 
-                            key={map.id}
+                            maps.map((map) => (
 
-                            style={{
+                                <MindMapCard
 
-                                background: "#1E293B",
+                                    key={map.id}
 
-                                borderRadius: 16,
+                                    map={map}
 
-                                padding: 24,
+                                    onDelete={() => handleDelete(map.id)}
 
-                                border: "1px solid #334155",
+                                />
 
-                                boxShadow:
+                            ))
 
-                                    "0 10px 30px rgba(0,0,0,.2)"
+                        }
 
-                            }}
+                    </div>
 
-                        >
+                )
 
-                            <h2>
-
-                                {map.title}
-
-                            </h2>
-
-                            <p
-
-                                style={{
-
-                                    color: "#CBD5E1",
-
-                                    minHeight: 60
-
-                                }}
-
-                            >
-
-                                {
-
-                                    map.description ||
-
-                                    "No description."
-
-                                }
-
-                            </p>
-
-                            <small
-
-                                style={{
-
-                                    color: "#94A3B8"
-
-                                }}
-
-                            >
-
-                                Created:
-
-                                {" "}
-
-                                {
-
-                                    new Date(
-
-                                        map.created_at
-
-                                    ).toLocaleDateString()
-
-                                }
-
-                            </small>
-
-                            <div
-
-                                style={{
-
-                                    marginTop: 20,
-
-                                    display: "flex",
-
-                                    gap: 12
-
-                                }}
-
-                            >
-
-                                <button
-
-                                    onClick={() =>
-
-                                        navigate(
-
-                                            `/mindmap/${map.id}`
-
-                                        )
-
-                                    }
-
-                                    style={{
-
-                                        flex: 1,
-
-                                        padding: 10,
-
-                                        background: "#2563EB",
-
-                                        color: "white",
-
-                                        border: "none",
-
-                                        borderRadius: 8,
-
-                                        cursor: "pointer"
-
-                                    }}
-
-                                >
-
-                                    Open
-
-                                </button>
-
-                                <button
-
-                                    onClick={() =>
-
-                                        handleDelete(
-
-                                            map.id
-
-                                        )
-
-                                    }
-
-                                    style={{
-
-                                        flex: 1,
-
-                                        padding: 10,
-
-                                        background: "#DC2626",
-
-                                        color: "white",
-
-                                        border: "none",
-
-                                        borderRadius: 8,
-
-                                        cursor: "pointer"
-
-                                    }}
-
-                                >
-
-                                    Delete
-
-                                </button>
-
-                            </div>
-
-                        </div>
-
-                    ))
-
-                }
-
-            </div>
+            }
 
             <CreateMindMapModal
 

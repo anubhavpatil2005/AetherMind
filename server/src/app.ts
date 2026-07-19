@@ -6,6 +6,7 @@ import authRoutes from "./routes/authRoutes";
 import mindmapRoutes from "./routes/mindmapRoutes";
 import nodeRoutes from "./routes/nodeRoutes";
 import edgeRoutes from "./routes/edgeRoutes";
+import aiRoutes from "./routes/aiRoutes";
 
 dotenv.config();
 
@@ -26,5 +27,6 @@ app.use("/api/auth", authRoutes);
 app.use("/api/mindmaps", mindmapRoutes);
 app.use("/api/nodes", nodeRoutes);
 app.use("/api/edges", edgeRoutes);
+app.use("/api/ai", aiRoutes);
 
 export default app;
