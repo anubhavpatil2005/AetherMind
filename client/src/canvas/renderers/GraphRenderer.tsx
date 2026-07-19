@@ -13,7 +13,9 @@ export default function GraphRenderer() {
 
         moveNode,
 
-        saveNodePosition
+        saveNode,
+
+        updateNodeTitle
 
     } = useGraphStore();
 
@@ -31,7 +33,7 @@ export default function GraphRenderer() {
 
             {
 
-                nodes.map(node=>(
+                nodes.map((node) => (
 
                     <Node
 
@@ -47,7 +49,9 @@ export default function GraphRenderer() {
 
                         onMove={moveNode}
 
-                        onSave={saveNodePosition}
+                        onSave={saveNode}
+
+                        onTitleChange={updateNodeTitle}
 
                     />
 

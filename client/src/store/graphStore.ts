@@ -4,33 +4,20 @@ import { getGraph } from "../api/mindmapApi";
 import { updateNode } from "../api/nodeApi";
 
 export interface GraphNode {
-
     id: number;
-
     title: string;
-
     description: string;
-
     type: string;
-
     x: number;
-
     y: number;
-
     color: string;
-
 }
 
 export interface GraphEdge {
-
     id: number;
-
     source_node_id: number;
-
     target_node_id: number;
-
     label: string;
-
 }
 
 interface GraphState {
@@ -43,7 +30,9 @@ interface GraphState {
 
     selectedNode: GraphNode | null;
 
-    loadGraph: (mindmapId: number) => Promise<void>;
+    loadGraph: (
+        mindmapId: number
+    ) => Promise<void>;
 
     moveNode: (
         id: number,
@@ -52,6 +41,15 @@ interface GraphState {
     ) => void;
 
     saveNodePosition: (
+        id: number
+    ) => Promise<void>;
+
+    updateNodeTitle: (
+        id: number,
+        title: string
+    ) => void;
+
+    saveNode: (
         id: number
     ) => Promise<void>;
 
@@ -75,7 +73,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
 
     selectedNode: null,
 
-    async loadGraph(mindmapId) {
+    async loadGraph(mindmapId: number) {
 
         try {
 
@@ -83,9 +81,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
                 loading: true
             });
 
-            const graph = await getGraph(
-                mindmapId
-            );
+            const graph = await getGraph(mindmapId);
 
             set({
 
@@ -97,9 +93,9 @@ export const useGraphStore = create<GraphState>((set, get) => ({
 
             });
 
-        } catch (error) {
+        } catch (err) {
 
-            console.error(error);
+            console.error(err);
 
             set({
                 loading: false
@@ -118,10 +114,10 @@ export const useGraphStore = create<GraphState>((set, get) => ({
                 node.id === id
 
                     ? {
-                        ...node,
-                        x,
-                        y
-                    }
+                          ...node,
+                          x,
+                          y
+                      }
 
                     : node
 
@@ -159,9 +155,69 @@ export const useGraphStore = create<GraphState>((set, get) => ({
 
             });
 
-        } catch (error) {
+        } catch (err) {
 
-            console.error(error);
+            console.error(err);
+
+        }
+
+    },
+
+    updateNodeTitle(id, title) {
+
+        set((state) => ({
+
+            nodes: state.nodes.map((node) =>
+
+                node.id === id
+
+                    ? {
+
+                          ...node,
+
+                          title
+
+                      }
+
+                    : node
+
+            )
+
+        }));
+
+    },
+
+    async saveNode(id) {
+
+        const node = get().nodes.find(
+
+            (n) => n.id === id
+
+        );
+
+        if (!node) return;
+
+        try {
+
+            await updateNode(id, {
+
+                title: node.title,
+
+                description: node.description,
+
+                type: node.type,
+
+                x: node.x,
+
+                y: node.y,
+
+                color: node.color
+
+            });
+
+        } catch (err) {
+
+            console.error(err);
 
         }
 
@@ -170,7 +226,9 @@ export const useGraphStore = create<GraphState>((set, get) => ({
     selectNode(node) {
 
         set({
+
             selectedNode: node
+
         });
 
     },
@@ -178,7 +236,9 @@ export const useGraphStore = create<GraphState>((set, get) => ({
     setNodes(nodes) {
 
         set({
+
             nodes
+
         });
 
     }

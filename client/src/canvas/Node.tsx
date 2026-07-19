@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 
 interface Props {
 
@@ -20,6 +20,11 @@ interface Props {
         id: number
     ) => void;
 
+    onTitleChange: (
+        id: number,
+        title: string
+    ) => void;
+
 }
 
 export default function Node({
@@ -34,59 +39,69 @@ export default function Node({
 
     onMove,
 
-    onSave
+    onSave,
 
-}: Props){
+    onTitleChange
+
+}: Props) {
 
     const drag = useRef(false);
 
     const offset = useRef({
 
-        x:0,
+        x: 0,
 
-        y:0
+        y: 0
 
     });
 
+    const [editing, setEditing] = useState(false);
+
+    const [value, setValue] = useState(title);
+
+    useEffect(() => {
+
+        setValue(title);
+
+    }, [title]);
+
     function pointerDown(
-        e:React.PointerEvent<HTMLDivElement>
-    ){
+        e: React.PointerEvent<HTMLDivElement>
+    ) {
+
+        if (editing) return;
 
         e.stopPropagation();
 
-        drag.current=true;
+        drag.current = true;
 
-        offset.current={
+        offset.current = {
 
-            x:e.clientX-x,
+            x: e.clientX - x,
 
-            y:e.clientY-y
+            y: e.clientY - y
 
         };
 
         e.currentTarget.setPointerCapture(
-
             e.pointerId
-
         );
 
     }
 
     function pointerMove(
+        e: React.PointerEvent<HTMLDivElement>
+    ) {
 
-        e:React.PointerEvent<HTMLDivElement>
-
-    ){
-
-        if(!drag.current)return;
+        if (!drag.current || editing) return;
 
         onMove(
 
             id,
 
-            e.clientX-offset.current.x,
+            e.clientX - offset.current.x,
 
-            e.clientY-offset.current.y
+            e.clientY - offset.current.y
 
         );
 
@@ -95,6 +110,8 @@ export default function Node({
     function pointerUp(
         e: React.PointerEvent<HTMLDivElement>
     ) {
+
+        if (editing) return;
 
         drag.current = false;
 
@@ -106,7 +123,25 @@ export default function Node({
 
     }
 
-    return(
+    function finishEditing() {
+
+        setEditing(false);
+
+        if (value.trim() === "") {
+
+            setValue(title);
+
+            return;
+
+        }
+
+        onTitleChange(id, value);
+
+        onSave(id);
+
+    }
+
+    return (
 
         <div
 
@@ -116,41 +151,121 @@ export default function Node({
 
             onPointerUp={pointerUp}
 
+            onDoubleClick={() => setEditing(true)}
+
             style={{
 
-                position:"absolute",
+                position: "absolute",
 
-                left:x,
+                left: x,
 
-                top:y,
+                top: y,
 
-                width:190,
+                width: 190,
 
-                minHeight:80,
+                minHeight: 80,
 
-                padding:18,
+                padding: 18,
 
-                borderRadius:18,
+                borderRadius: 18,
 
-                background:"#1E293B",
+                background: "#1E293B",
 
-                color:"white",
+                color: "white",
 
-                border:"1px solid #3B82F6",
+                border: "1px solid #3B82F6",
 
-                boxShadow:"0 12px 30px rgba(0,0,0,.35)",
+                boxShadow: "0 12px 30px rgba(0,0,0,.35)",
 
-                cursor:"grab",
+                cursor: editing ? "text" : "grab",
 
-                userSelect:"none",
+                userSelect: "none",
 
-                transition:"box-shadow .2s"
+                transition: "0.2s"
 
             }}
 
         >
 
-            {title}
+            {
+
+                editing ? (
+
+                    <input
+
+                        autoFocus
+
+                        value={value}
+
+                        onChange={(e) =>
+
+                            setValue(e.target.value)
+
+                        }
+
+                        onBlur={finishEditing}
+
+                        onKeyDown={(e) => {
+
+                            if (e.key === "Enter") {
+
+                                finishEditing();
+
+                            }
+
+                            if (e.key === "Escape") {
+
+                                setValue(title);
+
+                                setEditing(false);
+
+                            }
+
+                        }}
+
+                        style={{
+
+                            width: "100%",
+
+                            border: "none",
+
+                            outline: "none",
+
+                            background: "transparent",
+
+                            color: "white",
+
+                            fontSize: 16,
+
+                            fontWeight: 600
+
+                        }}
+
+                    />
+
+                ) : (
+
+                    <div
+
+                        style={{
+
+                            fontSize: 16,
+
+                            fontWeight: 600,
+
+                            wordBreak: "break-word"
+
+                        }}
+
+                    >
+
+                        {title}
+
+                    </div>
+
+                )
+
+            }
 
         </div>
 

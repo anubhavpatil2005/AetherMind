@@ -6,7 +6,10 @@ import {
     deleteMindMap
 } from "../api/mindmapApi";
 
+import { generateMindMap } from "../api/aiApi";
+
 import CreateMindMapModal from "../components/CreateMindMapModal";
+import GenerateAIModal from "../components/GenerateAIModal";
 import MindMapCard from "../components/MindMapCard";
 
 interface MindMap {
@@ -31,6 +34,8 @@ export default function Dashboard() {
 
     const [openModal, setOpenModal] = useState(false);
 
+    const [openAI, setOpenAI] = useState(false);
+
     useEffect(() => {
 
         loadMaps();
@@ -44,8 +49,6 @@ export default function Dashboard() {
             setLoading(true);
 
             const data = await getMindMaps();
-
-            console.log("MindMaps:", data);
 
             setMaps(data);
 
@@ -80,6 +83,28 @@ export default function Dashboard() {
             console.error(err);
 
             alert("Failed to delete.");
+
+        }
+
+    }
+
+    async function handleAIGeneration(topic: string) {
+
+        try {
+
+            const graph = await generateMindMap(topic);
+
+            setOpenAI(false);
+
+            await loadMaps();
+
+            navigate(`/mindmap/${graph.mindmapId}`);
+
+        } catch (err) {
+
+            console.error(err);
+
+            alert("AI Generation Failed");
 
         }
 
@@ -133,37 +158,79 @@ export default function Dashboard() {
 
                 >
 
-                    AetherMind
+                    🧠 AetherMind
 
                 </h1>
 
-                <button
-
-                    onClick={() => setOpenModal(true)}
+                <div
 
                     style={{
 
-                        padding: "12px 20px",
+                        display: "flex",
 
-                        background: "#3B82F6",
-
-                        color: "white",
-
-                        border: "none",
-
-                        borderRadius: 8,
-
-                        cursor: "pointer",
-
-                        fontWeight: 600
+                        gap: 15
 
                     }}
 
                 >
 
-                    + New Mind Map
+                    <button
 
-                </button>
+                        onClick={() => setOpenAI(true)}
+
+                        style={{
+
+                            padding: "12px 20px",
+
+                            background: "#8B5CF6",
+
+                            color: "white",
+
+                            border: "none",
+
+                            borderRadius: 8,
+
+                            cursor: "pointer",
+
+                            fontWeight: 600
+
+                        }}
+
+                    >
+
+                        ✨ Generate with AI
+
+                    </button>
+
+                    <button
+
+                        onClick={() => setOpenModal(true)}
+
+                        style={{
+
+                            padding: "12px 20px",
+
+                            background: "#3B82F6",
+
+                            color: "white",
+
+                            border: "none",
+
+                            borderRadius: 8,
+
+                            cursor: "pointer",
+
+                            fontWeight: 600
+
+                        }}
+
+                    >
+
+                        + New Mind Map
+
+                    </button>
+
+                </div>
 
             </div>
 
@@ -219,19 +286,8 @@ export default function Dashboard() {
 
                         <p>
 
-                            Click
-
-                            {" "}
-
-                            <strong>
-
-                                + New Mind Map
-
-                            </strong>
-
-                            {" "}
-
-                            to create your first AI knowledge graph.
+                            Click <strong>+ New Mind Map</strong> or{" "}
+                            <strong>✨ Generate with AI</strong> to create your first knowledge graph.
 
                         </p>
 
@@ -240,8 +296,6 @@ export default function Dashboard() {
                 )
 
             }
-
-            {/* Cards */}
 
             {/* Cards */}
 
@@ -256,7 +310,8 @@ export default function Dashboard() {
                             display: "grid",
 
                             gridTemplateColumns:
-                                "repeat(auto-fill, minmax(320px, 1fr))",
+
+                                "repeat(auto-fill,minmax(320px,1fr))",
 
                             gap: 25
 
@@ -292,13 +347,19 @@ export default function Dashboard() {
 
                 open={openModal}
 
-                onClose={() =>
-
-                    setOpenModal(false)
-
-                }
+                onClose={() => setOpenModal(false)}
 
                 onCreated={loadMaps}
+
+            />
+
+            <GenerateAIModal
+
+                open={openAI}
+
+                onClose={() => setOpenAI(false)}
+
+                onGenerate={handleAIGeneration}
 
             />
 

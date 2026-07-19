@@ -1,41 +1,46 @@
 import api from "./axios";
 
-export const createNode = async (data: any) => {
-    const res = await api.post("/nodes", data);
-    return res.data;
-};
-
-export const getNodes = async (
-    mindmapId: number
-) => {
-
-    const res = await api.get(
-        `/nodes/${mindmapId}`
-    );
-
-    return res.data;
-};
-
-export const updateNode = async (
+export async function updateNode(
     id: number,
     data: any
-) => {
+) {
 
-    const res = await api.put(
+    const response = await api.put(
+
         `/nodes/${id}`,
+
         data
+
     );
 
-    return res.data;
-};
+    return response.data;
 
-export const deleteNode = async (
+}
+
+export async function createNode(
+    data: any
+) {
+
+    const response = await api.post(
+
+        "/nodes",
+
+        data
+
+    );
+
+    return response.data;
+
+}
+
+export async function deleteNode(
     id: number
-) => {
+) {
 
-    const res = await api.delete(
+    await api.delete(
+
         `/nodes/${id}`
+
     );
 
-    return res.data;
-};
+}

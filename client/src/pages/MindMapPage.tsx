@@ -6,10 +6,18 @@ export default function MindMapPage() {
 
     const { id } = useParams();
 
+    if (!id) {
+
+        return <h1>MindMap Not Found</h1>;
+
+    }
+
     return (
 
         <Canvas
+
             mindmapId={Number(id)}
+
         />
 
     );

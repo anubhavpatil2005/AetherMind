@@ -34,26 +34,37 @@ export default function Canvas({
 
         loadGraph(mindmapId);
 
-    }, [mindmapId, loadGraph]);
+    }, [mindmapId]);
 
-    if (loading) {
+    if(loading){
 
-        return (
+        return(
 
-            <div
-                style={{
-                    width: "100vw",
-                    height: "100vh",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    background: "#0F172A",
-                    color: "white",
-                    fontSize: 22
-                }}
-            >
-                Loading Graph...
-            </div>
+        <div
+
+        style={{
+
+        height:"100vh",
+
+        display:"flex",
+
+        justifyContent:"center",
+
+        alignItems:"center",
+
+        background:"#0F172A",
+
+        color:"white",
+
+        fontSize:24
+
+        }}
+
+        >
+
+        Loading Mind Map...
+
+        </div>
 
         );
 
