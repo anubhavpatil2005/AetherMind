@@ -1,20 +1,99 @@
 import { Router } from "express";
+
 import { authenticate } from "../middleware/auth";
 
 import {
+
     createNode,
+
+    createChildNode,
+
     getNodes,
+
     updateNode,
+
     deleteNode
+
 } from "../controllers/nodeController";
 
 const router = Router();
 
+/*
+|--------------------------------------------------------------------------
+| Protected Routes
+|--------------------------------------------------------------------------
+*/
+
 router.use(authenticate);
 
-router.post("/", createNode);
-router.get("/:mindmapId", getNodes);
-router.put("/:id", updateNode);
-router.delete("/:id", deleteNode);
+/*
+|--------------------------------------------------------------------------
+| Create Child Node
+|--------------------------------------------------------------------------
+*/
+
+router.post(
+
+    "/child",
+
+    createChildNode
+
+);
+
+/*
+|--------------------------------------------------------------------------
+| Create Node
+|--------------------------------------------------------------------------
+*/
+
+router.post(
+
+    "/",
+
+    createNode
+
+);
+
+/*
+|--------------------------------------------------------------------------
+| Get Nodes of MindMap
+|--------------------------------------------------------------------------
+*/
+
+router.get(
+
+    "/:mindmapId",
+
+    getNodes
+
+);
+
+/*
+|--------------------------------------------------------------------------
+| Update Node
+|--------------------------------------------------------------------------
+*/
+
+router.put(
+
+    "/:id",
+
+    updateNode
+
+);
+
+/*
+|--------------------------------------------------------------------------
+| Delete Node
+|--------------------------------------------------------------------------
+*/
+
+router.delete(
+
+    "/:id",
+
+    deleteNode
+
+);
 
 export default router;

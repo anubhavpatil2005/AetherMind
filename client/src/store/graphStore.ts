@@ -61,6 +61,22 @@ interface GraphState {
         nodes: GraphNode[]
     ) => void;
 
+    addNode: (
+        node: GraphNode
+    ) => void;
+
+    addEdge: (
+        edge: GraphEdge
+    ) => void;
+
+    removeNode: (
+        id: number
+    ) => void;
+
+    removeEdgesByNode: (
+        nodeId: number
+    ) => void;
+
 }
 
 export const useGraphStore = create<GraphState>((set, get) => ({
@@ -78,7 +94,9 @@ export const useGraphStore = create<GraphState>((set, get) => ({
         try {
 
             set({
+
                 loading: true
+
             });
 
             const graph = await getGraph(mindmapId);
@@ -98,7 +116,9 @@ export const useGraphStore = create<GraphState>((set, get) => ({
             console.error(err);
 
             set({
+
                 loading: false
+
             });
 
         }
@@ -114,9 +134,13 @@ export const useGraphStore = create<GraphState>((set, get) => ({
                 node.id === id
 
                     ? {
+
                           ...node,
+
                           x,
+
                           y
+
                       }
 
                     : node
@@ -240,6 +264,70 @@ export const useGraphStore = create<GraphState>((set, get) => ({
             nodes
 
         });
+
+    },
+
+    addNode(node) {
+
+        set((state) => ({
+
+            nodes: [
+
+                ...state.nodes,
+
+                node
+
+            ]
+
+        }));
+
+    },
+
+    addEdge(edge) {
+
+        set((state) => ({
+
+            edges: [
+
+                ...state.edges,
+
+                edge
+
+            ]
+
+        }));
+
+    },
+
+    removeNode(id) {
+
+        set((state) => ({
+
+            nodes: state.nodes.filter(
+
+                (node) => node.id !== id
+
+            )
+
+        }));
+
+    },
+
+    removeEdgesByNode(nodeId) {
+
+        set((state) => ({
+
+            edges: state.edges.filter(
+
+                (edge) =>
+
+                    edge.source_node_id !== nodeId &&
+
+                    edge.target_node_id !== nodeId
+
+            )
+
+        }));
 
     }
 

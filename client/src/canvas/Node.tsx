@@ -1,13 +1,9 @@
-import { useRef, useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface Props {
-
     id: number;
-
     title: string;
-
     x: number;
-
     y: number;
 
     onMove: (
@@ -25,6 +21,11 @@ interface Props {
         title: string
     ) => void;
 
+    onContextMenu: (
+        id: number,
+        x: number,
+        y: number
+    ) => void;
 }
 
 export default function Node({
@@ -41,18 +42,17 @@ export default function Node({
 
     onSave,
 
-    onTitleChange
+    onTitleChange,
+
+    onContextMenu
 
 }: Props) {
 
-    const drag = useRef(false);
+    const dragging = useRef(false);
 
     const offset = useRef({
-
         x: 0,
-
         y: 0
-
     });
 
     const [editing, setEditing] = useState(false);
@@ -65,15 +65,13 @@ export default function Node({
 
     }, [title]);
 
-    function pointerDown(
+    function handlePointerDown(
         e: React.PointerEvent<HTMLDivElement>
     ) {
 
         if (editing) return;
 
-        e.stopPropagation();
-
-        drag.current = true;
+        dragging.current = true;
 
         offset.current = {
 
@@ -83,17 +81,17 @@ export default function Node({
 
         };
 
-        e.currentTarget.setPointerCapture(
-            e.pointerId
-        );
+        e.currentTarget.setPointerCapture(e.pointerId);
 
     }
 
-    function pointerMove(
+    function handlePointerMove(
         e: React.PointerEvent<HTMLDivElement>
     ) {
 
-        if (!drag.current || editing) return;
+        if (!dragging.current) return;
+
+        if (editing) return;
 
         onMove(
 
@@ -107,13 +105,13 @@ export default function Node({
 
     }
 
-    function pointerUp(
+    function handlePointerUp(
         e: React.PointerEvent<HTMLDivElement>
     ) {
 
-        if (editing) return;
+        if (!dragging.current) return;
 
-        drag.current = false;
+        dragging.current = false;
 
         onSave(id);
 
@@ -125,19 +123,47 @@ export default function Node({
 
     function finishEditing() {
 
-        setEditing(false);
+        const newTitle = value.trim();
 
-        if (value.trim() === "") {
+        if (newTitle.length === 0) {
 
             setValue(title);
 
-            return;
+        } else if (newTitle !== title) {
+
+            onTitleChange(
+
+                id,
+
+                newTitle
+
+            );
+
+            onSave(id);
 
         }
 
-        onTitleChange(id, value);
+        setEditing(false);
 
-        onSave(id);
+    }
+
+    function handleContext(
+        e: React.MouseEvent<HTMLDivElement>
+    ) {
+
+        e.preventDefault();
+
+        if (editing) return;
+
+        onContextMenu(
+
+            id,
+
+            e.clientX,
+
+            e.clientY
+
+        );
 
     }
 
@@ -145,11 +171,13 @@ export default function Node({
 
         <div
 
-            onPointerDown={pointerDown}
+            onPointerDown={handlePointerDown}
 
-            onPointerMove={pointerMove}
+            onPointerMove={handlePointerMove}
 
-            onPointerUp={pointerUp}
+            onPointerUp={handlePointerUp}
+
+            onContextMenu={handleContext}
 
             onDoubleClick={() => setEditing(true)}
 
@@ -161,27 +189,37 @@ export default function Node({
 
                 top: y,
 
-                width: 190,
+                width: 210,
 
-                minHeight: 80,
+                minHeight: 90,
 
                 padding: 18,
 
-                borderRadius: 18,
+                borderRadius: 16,
 
                 background: "#1E293B",
 
+                border: editing
+
+                    ? "2px solid #60A5FA"
+
+                    : "1px solid #334155",
+
                 color: "white",
 
-                border: "1px solid #3B82F6",
+                boxShadow:
 
-                boxShadow: "0 12px 30px rgba(0,0,0,.35)",
+                    "0 10px 25px rgba(0,0,0,.35)",
 
-                cursor: editing ? "text" : "grab",
+                cursor: editing
 
-                userSelect: "none",
+                    ? "text"
 
-                transition: "0.2s"
+                    : "grab",
+
+                transition: "0.2s",
+
+                userSelect: "none"
 
             }}
 
@@ -199,7 +237,11 @@ export default function Node({
 
                         onChange={(e) =>
 
-                            setValue(e.target.value)
+                            setValue(
+
+                                e.target.value
+
+                            )
 
                         }
 
@@ -227,11 +269,11 @@ export default function Node({
 
                             width: "100%",
 
+                            background: "transparent",
+
                             border: "none",
 
                             outline: "none",
-
-                            background: "transparent",
 
                             color: "white",
 
@@ -252,6 +294,8 @@ export default function Node({
                             fontSize: 16,
 
                             fontWeight: 600,
+
+                            lineHeight: 1.5,
 
                             wordBreak: "break-word"
 

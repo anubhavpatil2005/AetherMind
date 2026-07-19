@@ -168,11 +168,146 @@ export async function updateNode(
 
 }
 
-/*
-|--------------------------------------------------------------------------
-| Delete Node
-|--------------------------------------------------------------------------
-*/
+
+
+export async function createChildNode(
+    req: AuthRequest,
+    res: Response
+) {
+    try {
+
+        const {
+
+            parentNodeId,
+
+            title
+
+        } = req.body;
+
+        const db = await dbPromise;
+
+        const parent = await db.get(
+            `
+            SELECT *
+            FROM nodes
+            WHERE id=?
+            `,
+            [parentNodeId]
+        );
+
+        if (!parent) {
+
+            return res.status(404).json({
+
+                message: "Parent node not found"
+
+            });
+
+        }
+
+        const x = parent.x + 220;
+        const y = parent.y + 120;
+
+        const nodeResult = await db.run(
+            `
+            INSERT INTO nodes(
+                mindmap_id,
+                title,
+                description,
+                type,
+                x,
+                y,
+                color
+            )
+            VALUES(?,?,?,?,?,?,?)
+            `,
+            [
+
+                parent.mindmap_id,
+
+                title || "New Node",
+
+                "",
+
+                "concept",
+
+                x,
+
+                y,
+
+                "#10B981"
+
+            ]
+        );
+
+        const nodeId = nodeResult.lastID;
+
+        const edgeResult = await db.run(
+            `
+            INSERT INTO edges(
+                mindmap_id,
+                source_node_id,
+                target_node_id,
+                label
+            )
+            VALUES(?,?,?,?)
+            `,
+            [
+
+                parent.mindmap_id,
+
+                parent.id,
+
+                nodeId,
+
+                ""
+
+            ]
+        );
+
+        const node = await db.get(
+            `
+            SELECT *
+            FROM nodes
+            WHERE id=?
+            `,
+            [nodeId]
+        );
+
+        const edge = await db.get(
+            `
+            SELECT *
+            FROM edges
+            WHERE id=?
+            `,
+            [edgeResult.lastID]
+        );
+
+        return res.status(201).json({
+
+            node,
+
+            edge
+
+        });
+
+    }
+
+    catch (err) {
+
+        console.error(err);
+
+        return res.status(500).json({
+
+            message: "Internal Server Error"
+
+        });
+
+    }
+
+}
+
+
 
 export async function deleteNode(
     req: AuthRequest,
@@ -183,23 +318,73 @@ export async function deleteNode(
 
         const db = await dbPromise;
 
-        await db.run(
-            "DELETE FROM nodes WHERE id=?",
+        const node = await db.get(
+
+            `
+            SELECT *
+            FROM nodes
+            WHERE id=?
+            `,
+
             [req.params.id]
+
+        );
+
+        if (!node) {
+
+            return res.status(404).json({
+
+                message: "Node not found"
+
+            });
+
+        }
+
+        await db.run(
+
+            `
+            DELETE FROM edges
+            WHERE source_node_id=?
+               OR target_node_id=?
+            `,
+
+            [
+
+                req.params.id,
+
+                req.params.id
+
+            ]
+
+        );
+
+        await db.run(
+
+            `
+            DELETE FROM nodes
+            WHERE id=?
+            `,
+
+            [req.params.id]
+
         );
 
         return res.json({
-            message: "Node deleted successfully."
+
+            message: "Node deleted successfully"
+
         });
 
-    } catch (error) {
+    }
 
-        console.error(error);
+    catch (err) {
+
+        console.error(err);
 
         return res.status(500).json({
-            message: error instanceof Error
-                ? error.message
-                : "Internal Server Error"
+
+            message: "Internal Server Error"
+
         });
 
     }
