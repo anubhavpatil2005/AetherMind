@@ -1,31 +1,59 @@
 import { GoogleGenAI } from "@google/genai";
 
-export async function generateMindMap(topic: string) {
+function getAI() {
 
     const apiKey = process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
-        throw new Error("GEMINI_API_KEY is missing in .env");
+
+        throw new Error(
+
+            "GEMINI_API_KEY is missing in .env"
+
+        );
+
     }
 
-    const ai = new GoogleGenAI({
+    return new GoogleGenAI({
+
         apiKey
+
     });
+
+}
+
+/*
+|--------------------------------------------------------------------------
+| Generate Complete MindMap
+|--------------------------------------------------------------------------
+*/
+
+export async function generateMindMap(
+
+    topic: string
+
+) {
+
+    const ai = getAI();
 
     const prompt = `
 Generate a knowledge graph for the topic "${topic}".
 
 IMPORTANT:
-- Return ONLY valid JSON.
-- Do NOT use markdown.
-- Do NOT use \`\`\`json.
-- Do NOT include explanations.
 
-Return exactly this format:
+Return ONLY valid JSON.
+
+Do NOT use markdown.
+
+Do NOT use \`\`\`.
+
+Do NOT include explanations.
+
+Return exactly:
 
 {
-  "root": "Topic",
-  "children": [
+  "root":"${topic}",
+  "children":[
     "Concept 1",
     "Concept 2",
     "Concept 3",
@@ -36,32 +64,147 @@ Return exactly this format:
 `;
 
     const response = await ai.models.generateContent({
+
         model: "gemini-2.5-flash",
+
         contents: prompt
+
     });
 
     const text = response.text;
 
     if (!text) {
-        throw new Error("Gemini returned an empty response.");
+
+        throw new Error(
+
+            "Gemini returned empty response."
+
+        );
+
     }
 
-    // Remove markdown code fences if Gemini still returns them
     const cleaned = text
+
         .replace(/```json/gi, "")
+
         .replace(/```/g, "")
+
         .trim();
 
     try {
 
         return JSON.parse(cleaned);
 
-    } catch (error) {
+    }
 
-        console.error("Invalid JSON from Gemini:");
+    catch {
+
         console.error(cleaned);
 
-        throw new Error("Gemini returned invalid JSON.");
+        throw new Error(
+
+            "Gemini returned invalid JSON."
+
+        );
 
     }
+
+}
+
+/*
+|--------------------------------------------------------------------------
+| Expand Existing Node
+|--------------------------------------------------------------------------
+*/
+
+export async function expandNodeAI(
+
+    topic: string
+
+): Promise<string[]> {
+
+    const ai = getAI();
+
+    const prompt = `
+The concept is:
+
+"${topic}"
+
+Generate exactly five immediate child concepts.
+
+Rules:
+
+Return ONLY valid JSON.
+
+Do NOT use markdown.
+
+Do NOT use explanations.
+
+Return exactly:
+
+{
+    "children":[
+        "Concept 1",
+        "Concept 2",
+        "Concept 3",
+        "Concept 4",
+        "Concept 5"
+    ]
+}
+`;
+
+    const response = await ai.models.generateContent({
+
+        model: "gemini-2.5-flash",
+
+        contents: prompt
+
+    });
+
+    const text = response.text;
+
+    if (!text) {
+
+        throw new Error(
+
+            "Gemini returned empty response."
+
+        );
+
+    }
+
+    const cleaned = text
+
+        .replace(/```json/gi, "")
+
+        .replace(/```/g, "")
+
+        .trim();
+
+    try {
+
+        const json = JSON.parse(cleaned);
+
+        if (!Array.isArray(json.children)) {
+
+            throw new Error();
+
+        }
+
+        return json.children;
+
+    }
+
+    catch {
+
+        console.error(cleaned);
+
+        throw new Error(
+
+            "Gemini returned invalid JSON."
+
+        );
+
+    }
+
 }

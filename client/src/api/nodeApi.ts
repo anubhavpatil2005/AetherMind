@@ -1,10 +1,40 @@
 import api from "./axios";
 
-/* -------------------------------- */
-/* Create Node */
-/* -------------------------------- */
+/*
+|--------------------------------------------------------------------------
+| Types
+|--------------------------------------------------------------------------
+*/
 
-export async function createNode(data: any) {
+export interface CreateNodeRequest {
+
+    mindmap_id: number;
+
+    title: string;
+
+    description?: string;
+
+    type?: string;
+
+    x: number;
+
+    y: number;
+
+    color?: string;
+
+}
+
+/*
+|--------------------------------------------------------------------------
+| Create Node
+|--------------------------------------------------------------------------
+*/
+
+export async function createNode(
+
+    data: CreateNodeRequest
+
+) {
 
     const response = await api.post(
 
@@ -18,9 +48,11 @@ export async function createNode(data: any) {
 
 }
 
-/* -------------------------------- */
-/* Create Child Node */
-/* -------------------------------- */
+/*
+|--------------------------------------------------------------------------
+| Create Child Node
+|--------------------------------------------------------------------------
+*/
 
 export async function createChildNode(
 
@@ -48,15 +80,31 @@ export async function createChildNode(
 
 }
 
-/* -------------------------------- */
-/* Update Node */
-/* -------------------------------- */
+/*
+|--------------------------------------------------------------------------
+| Update Node
+|--------------------------------------------------------------------------
+*/
 
 export async function updateNode(
 
     id: number,
 
-    data: any
+    data: {
+
+        title?: string;
+
+        description?: string;
+
+        type?: string;
+
+        x?: number;
+
+        y?: number;
+
+        color?: string;
+
+    }
 
 ) {
 
@@ -72,9 +120,11 @@ export async function updateNode(
 
 }
 
-/* -------------------------------- */
-/* Delete Node */
-/* -------------------------------- */
+/*
+|--------------------------------------------------------------------------
+| Delete Node
+|--------------------------------------------------------------------------
+*/
 
 export async function deleteNode(
 
@@ -92,9 +142,11 @@ export async function deleteNode(
 
 }
 
-/* -------------------------------- */
-/* Duplicate Node */
-/* -------------------------------- */
+/*
+|--------------------------------------------------------------------------
+| Duplicate Node
+|--------------------------------------------------------------------------
+*/
 
 export async function duplicateNode(
 
@@ -112,9 +164,11 @@ export async function duplicateNode(
 
 }
 
-/* -------------------------------- */
-/* Change Node Color */
-/* -------------------------------- */
+/*
+|--------------------------------------------------------------------------
+| Update Node Color
+|--------------------------------------------------------------------------
+*/
 
 export async function updateNodeColor(
 
@@ -140,9 +194,11 @@ export async function updateNodeColor(
 
 }
 
-/* -------------------------------- */
-/* Expand Node using AI */
-/* -------------------------------- */
+/*
+|--------------------------------------------------------------------------
+| Expand Node with AI
+|--------------------------------------------------------------------------
+*/
 
 export async function expandNodeAI(
 
@@ -152,7 +208,7 @@ export async function expandNodeAI(
 
     const response = await api.post(
 
-        `/ai/expand`,
+        "/ai/expand",
 
         {
 

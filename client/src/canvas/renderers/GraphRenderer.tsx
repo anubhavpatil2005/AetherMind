@@ -7,8 +7,13 @@ import ContextMenu from "../../components/ContextMenu";
 import { useGraphStore } from "../../store/graphStore";
 
 import {
+
     createChildNode,
-    deleteNode
+
+    deleteNode,
+
+    expandNodeAI
+
 } from "../../api/nodeApi";
 
 export default function GraphRenderer() {
@@ -151,25 +156,47 @@ export default function GraphRenderer() {
 
     }
 
-    function handleRename() {
+    async function handleExpandAI() {
 
-        console.log(
+        try {
 
-            "Rename",
+            const result = await expandNodeAI(
 
-            menu.nodeId
+                menu.nodeId
 
-        );
+            );
+
+            result.nodes.forEach((node: any) => {
+
+                addNode(node);
+
+            });
+
+            result.edges.forEach((edge: any) => {
+
+                addEdge(edge);
+
+            });
+
+        }
+
+        catch (err) {
+
+            console.error(err);
+
+            alert("AI Expansion Failed");
+
+        }
 
         closeMenu();
 
     }
 
-    function handleExpandAI() {
+    function handleRename() {
 
         console.log(
 
-            "Expand AI",
+            "Rename",
 
             menu.nodeId
 
