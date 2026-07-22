@@ -2,9 +2,15 @@ import { useState } from "react";
 
 import Node from "../Node";
 import Edges from "../Edges";
-import ContextMenu from "../../components/ContextMenu";
 
+import ContextMenu from "../../components/ContextMenu";
+import ColorPicker from "../../components/ColorPicker";
+import SearchBar from "../../components/SearchBar";
+import KeyboardShortcuts from "../../components/KeyboardShortcuts";
 import { useGraphStore } from "../../store/graphStore";
+import { useRef } from "react";
+import { exportGraphAsPNG } from "../../utils/exportGraph";
+
 
 import {
 
@@ -12,7 +18,11 @@ import {
 
     deleteNode,
 
-    expandNodeAI
+    duplicateNode,
+
+    expandNodeAI,
+
+    updateNode
 
 } from "../../api/nodeApi";
 
@@ -24,11 +34,17 @@ export default function GraphRenderer() {
 
         edges,
 
+        selectedNode,
+
+        search,
+
         moveNode,
 
         saveNode,
 
         updateNodeTitle,
+
+        updateNodeLocal,
 
         addNode,
 
@@ -36,11 +52,29 @@ export default function GraphRenderer() {
 
         removeNode,
 
-        removeEdgesByNode
+        removeEdgesByNode,
+
+        selectNode,
+
+        setSearch
 
     } = useGraphStore();
 
     const [menu, setMenu] = useState({
+
+        visible: false,
+
+        nodeId: 0,
+
+        x: 0,
+
+        y: 0
+
+    });
+
+    const graphRef = useRef<HTMLDivElement>(null);
+
+    const [colorPicker, setColorPicker] = useState({
 
         visible: false,
 
@@ -77,6 +111,14 @@ export default function GraphRenderer() {
         y: number
 
     ) {
+
+        const node = nodes.find(
+
+            (n) => n.id === id
+
+        );
+
+        selectNode(node ?? null);
 
         setMenu({
 
@@ -142,6 +184,8 @@ export default function GraphRenderer() {
 
             );
 
+            selectNode(null);
+
         }
 
         catch (err) {
@@ -149,6 +193,32 @@ export default function GraphRenderer() {
             console.error(err);
 
             alert("Unable to delete node.");
+
+        }
+
+        closeMenu();
+
+    }
+
+    async function handleDuplicate() {
+
+        try {
+
+            const node = await duplicateNode(
+
+                menu.nodeId
+
+            );
+
+            addNode(node);
+
+        }
+
+        catch (err) {
+
+            console.error(err);
+
+            alert("Unable to duplicate node.");
 
         }
 
@@ -166,17 +236,21 @@ export default function GraphRenderer() {
 
             );
 
-            result.nodes.forEach((node: any) => {
+            result.nodes.forEach(
 
-                addNode(node);
+                (node: any) =>
 
-            });
+                    addNode(node)
 
-            result.edges.forEach((edge: any) => {
+            );
 
-                addEdge(edge);
+            result.edges.forEach(
 
-            });
+                (edge: any) =>
+
+                    addEdge(edge)
+
+            );
 
         }
 
@@ -206,102 +280,228 @@ export default function GraphRenderer() {
 
     }
 
-    function handleDuplicate() {
-
-        console.log(
-
-            "Duplicate",
-
-            menu.nodeId
-
-        );
-
-        closeMenu();
-
-    }
-
     function handleColor() {
 
-        console.log(
+        setColorPicker({
 
-            "Color",
+            visible: true,
 
-            menu.nodeId
+            nodeId: menu.nodeId,
 
-        );
+            x: menu.x + 250,
+
+            y: menu.y
+
+        });
 
         closeMenu();
 
     }
 
-    return (
+    async function handleColorSelected(
 
-        <>
+        color: string
 
-            <Edges
+    ) {
 
-                nodes={nodes}
+        const node = nodes.find(
 
-                edges={edges}
+            (n) =>
 
-            />
+                n.id === colorPicker.nodeId
+
+        );
+
+        if (!node) return;
+
+        updateNodeLocal(
+
+            node.id,
 
             {
 
-                nodes.map((node) => (
-
-                    <Node
-
-                        key={node.id}
-
-                        id={node.id}
-
-                        title={node.title}
-
-                        x={node.x}
-
-                        y={node.y}
-
-                        onMove={moveNode}
-
-                        onSave={saveNode}
-
-                        onTitleChange={updateNodeTitle}
-
-                        onContextMenu={openContextMenu}
-
-                    />
-
-                ))
+                color
 
             }
 
-            <ContextMenu
+        );
 
-                visible={menu.visible}
+        try {
 
-                x={menu.x}
+            await updateNode(
 
-                y={menu.y}
+                node.id,
 
-                onClose={closeMenu}
+                {
 
-                onAddChild={handleAddChild}
+                    title: node.title,
 
-                onRename={handleRename}
+                    description: node.description,
 
-                onDelete={handleDelete}
+                    type: node.type,
 
-                onExpandAI={handleExpandAI}
+                    x: node.x,
 
-                onDuplicate={handleDuplicate}
+                    y: node.y,
 
-                onColor={handleColor}
+                    color
 
-            />
+                }
 
-        </>
+            );
 
-    );
+        }
 
-}
+        catch (err) {
+
+            console.error(err);
+
+            alert("Failed to update color.");
+
+        }
+
+    }
+return (
+
+    <>
+
+        <KeyboardShortcuts />
+
+        <SearchBar
+
+            onSearch={setSearch}
+
+        />
+
+        <Edges
+
+            nodes={nodes}
+
+            edges={edges}
+
+        />
+        
+
+        {
+
+            nodes.map((node) => (
+
+                <Node
+
+                    key={node.id}
+
+                    id={node.id}
+
+                    title={node.title}
+
+                    color={node.color}
+
+                    x={node.x}
+
+                    y={node.y}
+
+                    selected={
+
+                        selectedNode?.id === node.id
+
+                    }
+
+                    highlight={
+
+                        search.length > 0 &&
+
+                        node.title
+
+                            .toLowerCase()
+
+                            .includes(
+
+                                search.toLowerCase()
+
+                            )
+
+                    }
+
+                    onSelect={(id) => {
+
+                        const found = nodes.find(
+
+                            (n) => n.id === id
+
+                        );
+
+                        selectNode(
+
+                            found ?? null
+
+                        );
+
+                    }}
+
+                    onMove={moveNode}
+
+                    onSave={saveNode}
+
+                    onTitleChange={updateNodeTitle}
+
+                    onContextMenu={openContextMenu}
+
+                />
+
+            ))
+
+        }
+
+        <ContextMenu
+
+            visible={menu.visible}
+
+            x={menu.x}
+
+            y={menu.y}
+
+            onClose={closeMenu}
+
+            onAddChild={handleAddChild}
+
+            onRename={handleRename}
+
+            onColor={handleColor}
+
+            onDuplicate={handleDuplicate}
+
+            onExpandAI={handleExpandAI}
+
+            onDelete={handleDelete}
+
+        />
+
+        <ColorPicker
+
+            visible={colorPicker.visible}
+
+            x={colorPicker.x}
+
+            y={colorPicker.y}
+
+            onClose={() =>
+
+                setColorPicker({
+
+                    ...colorPicker,
+
+                    visible: false
+
+                })
+
+            }
+
+            onSelect={handleColorSelected}
+
+        />
+
+    </>
+
+);
+
+}    

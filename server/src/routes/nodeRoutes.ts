@@ -8,6 +8,8 @@ import {
 
     createChildNode,
 
+    duplicateNode,
+
     getNodes,
 
     updateNode,
@@ -93,6 +95,20 @@ router.delete(
     "/:id",
 
     deleteNode
+
+);
+
+/*
+|--------------------------------------------------------------------------
+| Duplicate Node
+|--------------------------------------------------------------------------
+*/
+
+router.post(
+
+    "/:id/duplicate",
+
+    duplicateNode
 
 );
 

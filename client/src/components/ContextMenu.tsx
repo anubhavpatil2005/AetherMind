@@ -1,3 +1,5 @@
+import { useEffect, useRef } from "react";
+
 interface Props {
 
     x: number;
@@ -46,13 +48,59 @@ export default function ContextMenu({
 
 }: Props) {
 
+    const menuRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+
+        function handleClick(e: MouseEvent) {
+
+            if (
+
+                menuRef.current &&
+
+                !menuRef.current.contains(e.target as Node)
+
+            ) {
+
+                onClose();
+
+            }
+
+        }
+
+        if (visible) {
+
+            window.addEventListener(
+
+                "mousedown",
+
+                handleClick
+
+            );
+
+        }
+
+        return () => {
+
+            window.removeEventListener(
+
+                "mousedown",
+
+                handleClick
+
+            );
+
+        };
+
+    }, [visible, onClose]);
+
     if (!visible) return null;
 
     return (
 
         <div
 
-            onMouseLeave={onClose}
+            ref={menuRef}
 
             style={{
 
@@ -62,17 +110,19 @@ export default function ContextMenu({
 
                 top: y,
 
-                width: 240,
+                width: 250,
 
                 background: "#1E293B",
 
                 border: "1px solid #334155",
 
-                borderRadius: 12,
-
-                boxShadow: "0 12px 30px rgba(0,0,0,.35)",
+                borderRadius: 14,
 
                 overflow: "hidden",
+
+                boxShadow:
+
+                    "0 14px 35px rgba(0,0,0,.4)",
 
                 zIndex: 9999
 
@@ -166,27 +216,45 @@ function MenuItem({
 
                 padding: "14px 18px",
 
+                display: "flex",
+
+                alignItems: "center",
+
                 cursor: "pointer",
 
-                color: danger ? "#EF4444" : "white",
-
-                borderBottom: "1px solid #334155",
+                fontSize: 15,
 
                 fontWeight: 500,
 
-                transition: "background 0.2s"
+                color: danger
+
+                    ? "#EF4444"
+
+                    : "white",
+
+                borderBottom:
+
+                    "1px solid #334155",
+
+                transition:
+
+                    "background .15s"
 
             }}
 
             onMouseEnter={(e) => {
 
-                e.currentTarget.style.background = "#334155";
+                e.currentTarget.style.background =
+
+                    "#334155";
 
             }}
 
             onMouseLeave={(e) => {
 
-                e.currentTarget.style.background = "transparent";
+                e.currentTarget.style.background =
+
+                    "transparent";
 
             }}
 
